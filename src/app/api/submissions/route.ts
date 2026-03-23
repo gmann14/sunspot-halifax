@@ -30,6 +30,10 @@ export async function POST(request: Request) {
 
     const supabase = createServiceClient()
 
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+    }
+
     const { error } = await supabase.from('user_submissions').insert({
       venue_id: venue_id || null,
       venue_name,

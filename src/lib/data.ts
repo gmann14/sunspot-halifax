@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabase } from './supabase'
 import { getCurrentSlot } from './suncalc-helpers'
 import { continuousSunMinutes, nextSunWindow, bestSunWindow } from './venues'
 import type { Venue, VenueWithForecast, VenueSunForecast } from '@/types'
@@ -9,11 +9,13 @@ import type { Venue, VenueWithForecast, VenueSunForecast } from '@/types'
 export async function getVenuesWithForecasts(
   slotTime?: Date
 ): Promise<VenueWithForecast[]> {
+  const db = getSupabase()
+  if (!db) return []
+
   const slot = slotTime ?? getCurrentSlot()
-  const slotISO = slot.toISOString()
 
   // Fetch venues
-  const { data: venues, error: venuesError } = await supabase
+  const { data: venues, error: venuesError } = await db
     .from('venues')
     .select('*')
     .order('name')
@@ -29,7 +31,7 @@ export async function getVenuesWithForecasts(
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
 
-  const { data: forecasts, error: forecastError } = await supabase
+  const { data: forecasts, error: forecastError } = await db
     .from('venue_sun_forecast')
     .select('*')
     .gte('slot_starts_at', today.toISOString())
@@ -86,7 +88,10 @@ export async function getVenuesWithForecasts(
 export async function getVenueBySlug(
   slug: string
 ): Promise<VenueWithForecast | null> {
-  const { data: venue, error } = await supabase
+  const db = getSupabase()
+  if (!db) return null
+
+  const { data: venue, error } = await db
     .from('venues')
     .select('*')
     .eq('slug', slug)
@@ -99,7 +104,7 @@ export async function getVenueBySlug(
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
 
-  const { data: forecasts } = await supabase
+  const { data: forecasts } = await db
     .from('venue_sun_forecast')
     .select('*')
     .eq('venue_id', venue.id)

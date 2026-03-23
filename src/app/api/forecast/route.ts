@@ -26,6 +26,10 @@ export async function POST(request: Request) {
   const mode = searchParams.get('mode') ?? 'current' // 'full' or 'current'
   const supabase = createServiceClient()
 
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+  }
+
   // Fetch all venues
   const { data: venues, error: venuesError } = await supabase
     .from('venues')
