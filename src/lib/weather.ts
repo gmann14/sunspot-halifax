@@ -1,4 +1,4 @@
-import { ENVIRONMENT_CANADA_URL, WEATHER_CACHE_SECONDS } from './constants'
+import { ENVIRONMENT_CANADA_URL, WEATHER_CACHE_SECONDS, OPEN_METEO_LAT, OPEN_METEO_LNG } from './constants'
 import type { WeatherData } from '@/types'
 
 let weatherCache: { data: WeatherData; timestamp: number } | null = null
@@ -53,7 +53,22 @@ function parseWeatherXML(xml: string): WeatherData | null {
 }
 
 /**
- * Fetch current weather from Environment Canada with caching
+ * Fetch current cloud cover from Open-Meteo.
+ */
+async function fetchOpenMeteoCloudCover(): Promise<number | null> {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${OPEN_METEO_LAT}&longitude=${OPEN_METEO_LNG}&current=cloud_cover&timezone=America%2FHalifax`
+    const res = await fetch(url, { signal: AbortSignal.timeout(5_000) })
+    if (!res.ok) return null
+    const data = await res.json() as { current?: { cloud_cover?: number } }
+    return data.current?.cloud_cover ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Fetch current weather from Environment Canada + Open-Meteo cloud cover, with caching
  */
 export async function getWeather(): Promise<WeatherData | null> {
   // Check cache
@@ -65,33 +80,32 @@ export async function getWeather(): Promise<WeatherData | null> {
   }
 
   try {
-    const response = await fetch(ENVIRONMENT_CANADA_URL, {
-      next: { revalidate: WEATHER_CACHE_SECONDS },
-    })
+    const [ecResponse, cloudCover] = await Promise.all([
+      fetch(ENVIRONMENT_CANADA_URL, { next: { revalidate: WEATHER_CACHE_SECONDS } }),
+      fetchOpenMeteoCloudCover(),
+    ])
 
-    if (!response.ok) {
-      // Return cached value if available
+    if (!ecResponse.ok) {
       if (weatherCache) {
         return { ...weatherCache.data, cached: true }
       }
       return null
     }
 
-    const xml = await response.text()
+    const xml = await ecResponse.text()
     const data = parseWeatherXML(xml)
 
     if (data) {
+      data.cloud_cover = cloudCover
       weatherCache = { data, timestamp: Date.now() }
       return data
     }
 
-    // Parse failed, return cache
     if (weatherCache) {
       return { ...weatherCache.data, cached: true }
     }
     return null
   } catch {
-    // Network error, return cache
     if (weatherCache) {
       return { ...weatherCache.data, cached: true }
     }

@@ -38,6 +38,13 @@ export const WEATHER_CACHE_SECONDS = 1800 // 30 minutes
 export const ENVIRONMENT_CANADA_URL =
   'https://dd.weather.gc.ca/citypage_weather/xml/NS/s0000318_e.xml'
 
+// Open-Meteo cloud cover threshold for skipping sun calc
+export const CLOUD_COVER_SHADE_THRESHOLD = 80 // percent
+
+// Open-Meteo API for Halifax
+export const OPEN_METEO_LAT = 44.6488
+export const OPEN_METEO_LNG = -63.5752
+
 // Timezone
 export const HALIFAX_TIMEZONE = 'America/Halifax'
 

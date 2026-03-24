@@ -32,14 +32,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Compute forecasts
-    const { rows, venueCount, slotCount } = await computeForecasts(supabase, mode)
+    // Compute forecasts (includes Open-Meteo cloud cover fetch)
+    const { rows, venueCount, slotCount, weather } = await computeForecasts(supabase, mode)
 
     if (rows.length === 0) {
       return NextResponse.json({
         message: 'No slots to compute (sun may be down)',
         mode,
         venues: venueCount,
+        weather,
       })
     }
 
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
       venues: venueCount,
       forecasts: rows.length,
       cleaned_up: cleanedUp,
+      weather,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'

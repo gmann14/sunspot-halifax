@@ -63,6 +63,13 @@ export interface WeatherData {
   icon_code: string
   cached: boolean
   fetched_at: string
+  cloud_cover?: number | null
+}
+
+export interface HourlyWeather {
+  time: string[]
+  cloud_cover: number[]
+  temperature_2m: number[]
 }
 
 export interface Building {
