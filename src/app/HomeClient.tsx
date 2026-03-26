@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, Suspense, lazy } from 'react'
 import type { VenueWithForecast, WeatherData, FilterState } from '@/types'
-import { getCurrentSlot, isSunUp } from '@/lib/suncalc-helpers'
+import { getCurrentSlot, isSunUp, isPatioSeason } from '@/lib/suncalc-helpers'
 import { sortByBestMatch, haversineDistance, isVenueOpen, continuousSunMinutes, nextSunWindow } from '@/lib/venues'
 import WeatherBanner from '@/components/WeatherBanner'
 import TimeSlider from '@/components/TimeSlider'
@@ -37,6 +37,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
   })
 
   const sunIsDown = !isSunUp(selectedTime)
+  const offSeason = !isPatioSeason(selectedTime)
 
   // Recompute venue sun statuses for the selected time slot
   const venuesAtTime = useMemo(() => {
@@ -172,6 +173,11 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
           />
         </div>
         <WeatherBanner />
+        {offSeason && (
+          <div className="px-4 py-2 bg-blue-50 text-blue-700 text-xs text-center">
+            Patio season: May–October. Some patios may be closed.
+          </div>
+        )}
         <FilterBar
           filters={filters}
           onChange={setFilters}

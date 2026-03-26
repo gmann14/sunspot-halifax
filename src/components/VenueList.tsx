@@ -18,72 +18,19 @@ interface VenueListProps {
   sunIsDown?: boolean
 }
 
-export default function VenueList({
+function VenueCards({
   venues,
   onVenueClick,
   userLat,
   userLng,
   selectedTime,
-  isEmpty,
-  hasFilters,
-  onClearFilters,
-  allInShade,
-  sunIsDown,
-}: VenueListProps) {
-  if (sunIsDown) {
-    return (
-      <div className="px-4 py-12 text-center text-gray-500">
-        <p className="text-lg mb-2">Sun&apos;s down for today.</p>
-        <p className="text-sm">Predictions resume at sunrise tomorrow.</p>
-      </div>
-    )
-  }
-
-  if (isEmpty && hasFilters) {
-    return (
-      <div className="px-4 py-12 text-center text-gray-500">
-        <p className="text-sm mb-3">No venues match your filters.</p>
-        {onClearFilters && (
-          <button
-            onClick={onClearFilters}
-            className="px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-    )
-  }
-
-  if (allInShade && !isEmpty) {
-    return (
-      <div className="px-4 py-6 text-center text-gray-500 border-b border-gray-100">
-        <p className="text-sm">
-          All patios are in shade right now. Try sliding ahead to find the next
-          sunny window.
-        </p>
-      </div>
-    )
-  }
-
-  if (venues.length === 0) {
-    return (
-      <div className="px-4 py-12 text-center text-gray-500">
-        <p className="text-sm mb-4">No patios nearby. Try:</p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {NEIGHBORHOODS.map((n) => (
-            <button
-              key={n.name}
-              className="px-3 py-1.5 text-xs font-medium bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-            >
-              {n.name}
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
+}: {
+  venues: VenueWithForecast[]
+  onVenueClick: (venue: VenueWithForecast) => void
+  userLat?: number
+  userLng?: number
+  selectedTime: Date
+}) {
   return (
     <div className="divide-y divide-gray-50">
       {venues.map((venue) => {
@@ -103,5 +50,96 @@ export default function VenueList({
         )
       })}
     </div>
+  )
+}
+
+export default function VenueList({
+  venues,
+  onVenueClick,
+  userLat,
+  userLng,
+  selectedTime,
+  isEmpty,
+  hasFilters,
+  onClearFilters,
+  allInShade,
+  sunIsDown,
+}: VenueListProps) {
+  // Sun down — show message only
+  if (sunIsDown) {
+    return (
+      <div className="px-4 py-12 text-center text-gray-500">
+        <p className="text-lg mb-2">Sun&apos;s down for today.</p>
+        <p className="text-sm">Predictions resume at sunrise tomorrow.</p>
+      </div>
+    )
+  }
+
+  // Active filters but nothing matches
+  if (isEmpty && hasFilters) {
+    return (
+      <div className="px-4 py-12 text-center text-gray-500">
+        <p className="text-sm mb-3">No venues match your filters.</p>
+        {onClearFilters && (
+          <button
+            onClick={onClearFilters}
+            className="px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  // No venues at all (empty database)
+  if (venues.length === 0) {
+    return (
+      <div className="px-4 py-12 text-center text-gray-500">
+        <p className="text-sm mb-4">No patios nearby. Try:</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {NEIGHBORHOODS.map((n) => (
+            <button
+              key={n.name}
+              className="px-3 py-1.5 text-xs font-medium bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              {n.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // All in shade — show banner + venue list
+  if (allInShade) {
+    return (
+      <>
+        <div className="px-4 py-3 text-center text-gray-500 bg-gray-50 border-b border-gray-100">
+          <p className="text-sm">
+            All patios are in shade right now. Try sliding ahead to find the
+            next sunny window.
+          </p>
+        </div>
+        <VenueCards
+          venues={venues}
+          onVenueClick={onVenueClick}
+          userLat={userLat}
+          userLng={userLng}
+          selectedTime={selectedTime}
+        />
+      </>
+    )
+  }
+
+  // Normal list
+  return (
+    <VenueCards
+      venues={venues}
+      onVenueClick={onVenueClick}
+      userLat={userLat}
+      userLng={userLng}
+      selectedTime={selectedTime}
+    />
   )
 }

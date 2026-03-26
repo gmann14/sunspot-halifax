@@ -14,7 +14,7 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="p-2 text-gray-500 hover:text-gray-700"
+        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700"
         aria-label="Search venues"
       >
         <svg
@@ -50,7 +50,7 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
           onChange('')
           setIsOpen(false)
         }}
-        className="p-1.5 text-gray-400 hover:text-gray-600"
+        className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600"
         aria-label="Close search"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

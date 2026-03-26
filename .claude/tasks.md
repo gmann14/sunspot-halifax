@@ -46,18 +46,20 @@
 - [x] Bottom venue list sorted by remaining sun time, with distance
 - [x] Client-side venue status recomputation when time slider changes
 
-## Phase 4: Map + Venue Details — ~60% done
+## Phase 4: Map + Venue Details ✅ DONE
 - [x] Map component with Mapbox GL
 - [x] Venue detail bottom sheet (VenueDetailSheet.tsx)
 - [x] OG image generation route (`/api/og`)
-- [ ] Integrate shadow overlay (mapbox-gl-shadow-simulator)
-- [ ] Pin clustering (Mapbox built-in, count badges)
-- [ ] Cluster tap → zoom to reveal pins
-- [ ] Share functionality (Web Share API + fallback)
-- [ ] `/venue/[slug]` SSR detail page polish (standalone, map lazy-loaded)
-- [ ] Mobile-responsive polish
-- [ ] Inline onboarding tooltips (first visit only)
-- [ ] Empty states (no venues, all shade, after sunset, off-season, venue not found)
+- [x] Shadow overlay integration (mapbox-gl-shadow-simulator, optional via NEXT_PUBLIC_SHADEMAP_KEY)
+- [x] Pin clustering (GeoJSON source + Mapbox built-in clustering, count badges, amber circles)
+- [x] Cluster tap → zoom to reveal individual pins (getClusterExpansionZoom)
+- [x] Selected venue highlight ring on map
+- [x] Share functionality (ShareButton component: Web Share API + clipboard fallback with "Copied!" toast)
+- [x] `/venue/[slug]` SSR detail page polish (standalone, lazy-load map, branding header, off-season banner)
+- [x] Mobile-responsive polish (44px touch targets, proper tap areas)
+- [ ] Inline onboarding tooltips (first visit only) — deferred to Phase 5
+- [x] Empty states: no venues nearby (neighborhood buttons), all in shade (banner + venue list), after sunset, off-season banner, venue not found (404 page)
+- [x] Off-season banner on home page (outside May-October)
 
 ## Phase 5: Community + Deploy — not started
 - [ ] "Suggest a Patio" submission form
@@ -78,7 +80,15 @@
 - Deployed to Vercel: https://sunspot-halifax.vercel.app (needs cloud Supabase for production data)
 - 8 git commits total
 
-## Recent Progress (2026-03-24)
+## Recent Progress (2026-03-26)
+- [x] Phase 4 complete: Map rewritten with GeoJSON clustering + shadow overlay
+- [x] ShareButton component: Web Share API with clipboard "Copied!" feedback
+- [x] Venue detail page polished: standalone usable, branding header, off-season support
+- [x] Empty states: all in shade (shows venue list below banner), off-season, sun down, no venues nearby
+- [x] Mobile-responsive: 44px touch targets on search/close buttons
+- [x] 51 tests passing, TypeScript clean
+
+## Earlier Progress (2026-03-24)
 - [x] OSM Overpass building height enrichment: 21.4% → 99.5% height coverage (scripts/enrich-heights.ts)
 - [x] Open-Meteo cloud cover integration: ≥80% cloud = shade, skips PostGIS queries
 - [x] Weather data (cloud_cover_hourly, current_temperature, current_cloud_cover) now in forecast API response

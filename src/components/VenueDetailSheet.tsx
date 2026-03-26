@@ -5,6 +5,7 @@ import type { VenueWithForecast } from '@/types'
 import { formatPriceLevel, isVenueOpen, formatWalkingTime } from '@/lib/venues'
 import { formatTimeAT } from '@/lib/suncalc-helpers'
 import ForecastBar from './ForecastBar'
+import ShareButton from './ShareButton'
 
 interface VenueDetailSheetProps {
   venue: VenueWithForecast | null
@@ -210,19 +211,12 @@ export default function VenueDetailSheet({
                 Website
               </a>
             )}
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/venue/${venue.slug}`
-                if (navigator.share) {
-                  navigator.share({ title: venue.name, url }).catch(() => {})
-                } else {
-                  navigator.clipboard.writeText(url).catch(() => {})
-                }
-              }}
+            <ShareButton
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/venue/${venue.slug}`}
+              title={`${venue.name} — SunSpot Halifax`}
+              text={`${sunStatusText} at ${venue.name}`}
               className="px-4 py-2.5 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Share
-            </button>
+            />
           </div>
 
           {/* Confidence label */}

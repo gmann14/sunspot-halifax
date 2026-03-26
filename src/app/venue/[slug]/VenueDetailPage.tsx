@@ -3,10 +3,11 @@
 import { Suspense, lazy } from 'react'
 import Link from 'next/link'
 import type { VenueWithForecast } from '@/types'
-import { formatPriceLevel, isVenueOpen, formatWalkingTime } from '@/lib/venues'
-import { formatTimeAT, getCurrentSlot } from '@/lib/suncalc-helpers'
+import { formatPriceLevel, isVenueOpen } from '@/lib/venues'
+import { formatTimeAT, getCurrentSlot, isPatioSeason } from '@/lib/suncalc-helpers'
 import ForecastBar from '@/components/ForecastBar'
 import { MapSkeleton } from '@/components/LoadingSkeleton'
+import ShareButton from '@/components/ShareButton'
 
 const Map = lazy(() => import('@/components/Map'))
 
@@ -18,6 +19,7 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
   const now = getCurrentSlot()
   const isOpen = isVenueOpen(venue, now)
   const isSunny = venue.current_status === 'sun'
+  const offSeason = !isPatioSeason(now)
 
   const sunStatusText = (() => {
     if (isSunny && venue.continuous_sun_minutes) {
@@ -42,49 +44,81 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
   })()
 
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.lat},${venue.lng}`
+  const typeBadge = venue.type.charAt(0).toUpperCase() + venue.type.slice(1)
 
   return (
-    <div className="min-h-dvh bg-white">
-      {/* Back navigation */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3">
-        <Link
-          href="/"
-          className="text-sm text-amber-600 hover:text-amber-700 font-medium"
-        >
-          ← Back to all venues
-        </Link>
+    <div className="min-h-dvh bg-gray-50">
+      {/* Sticky header */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
+        <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+          <Link
+            href="/"
+            className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+          >
+            ← Back to all venues
+          </Link>
+          <span className="text-sm font-bold text-amber-600">SunSpot Halifax</span>
+        </div>
       </header>
 
-      <main className="max-w-lg mx-auto">
+      <main className="max-w-lg mx-auto bg-white min-h-[calc(100dvh-49px)]">
         {/* Photo */}
-        {venue.photos?.[0] && (
-          <div className="w-full h-56 bg-gray-100">
+        {venue.photos?.[0] ? (
+          <div className="w-full h-56 bg-gray-100 relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={venue.photos[0].url}
               alt={venue.name}
               className="w-full h-full object-cover"
             />
+            <div className="absolute bottom-2 left-2">
+              <span className="inline-block text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-1 rounded-full">
+                {typeBadge}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-32 bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+            <span className="text-4xl">☀️</span>
           </div>
         )}
 
         <div className="px-4 py-4">
-          {/* Name + type */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">{venue.name}</h1>
-              <span className="text-sm text-gray-500">
-                {venue.type.charAt(0).toUpperCase() + venue.type.slice(1)}
-              </span>
-            </div>
+          {/* Name + rating */}
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold leading-tight">{venue.name}</h1>
             {venue.rating && (
-              <span className="text-sm font-medium bg-amber-50 text-amber-700 px-2 py-1 rounded">
+              <span className="shrink-0 text-sm font-medium bg-amber-50 text-amber-700 px-2 py-1 rounded">
                 ⭐ {venue.rating}
               </span>
             )}
           </div>
 
-          {/* Sun status */}
+          {/* Meta row */}
+          <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+            <span>{typeBadge}</span>
+            {venue.price_level && (
+              <>
+                <span className="text-gray-300">·</span>
+                <span>{formatPriceLevel(venue.price_level)}</span>
+              </>
+            )}
+            <span className="text-gray-300">·</span>
+            {isOpen ? (
+              <span className="text-green-600 font-medium">Open now</span>
+            ) : (
+              <span className="text-red-500 font-medium">Closed</span>
+            )}
+          </div>
+
+          {/* Off-season banner */}
+          {offSeason && venue.patio_season_only && (
+            <div className="mt-3 p-3 rounded-lg bg-blue-50 text-blue-700 text-sm">
+              Patio season runs May–October. This patio may be closed for the season.
+            </div>
+          )}
+
+          {/* Sun status card */}
           <div
             className={`mt-3 p-3 rounded-lg ${
               isSunny ? 'bg-amber-50 text-amber-800' : 'bg-gray-50 text-gray-600'
@@ -108,24 +142,10 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
             </div>
           )}
 
-          {/* Details */}
-          <div className="mt-4 space-y-2 text-sm text-gray-600">
-            {venue.address && <p>📍 {venue.address}</p>}
-            {venue.price_level && (
-              <p>💰 {formatPriceLevel(venue.price_level)}</p>
-            )}
-            <p>
-              {isOpen ? (
-                <span className="text-green-600 font-medium">Open now</span>
-              ) : (
-                <span className="text-red-500 font-medium">Closed</span>
-              )}
-            </p>
-            <p>
-              📍 Patio location:{' '}
-              {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
-            </p>
-          </div>
+          {/* Address */}
+          {venue.address && (
+            <p className="text-sm text-gray-600 mt-4">📍 {venue.address}</p>
+          )}
 
           {/* Photo attribution */}
           {venue.photos?.[0]?.html_attributions?.[0] && (
@@ -137,7 +157,7 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
             />
           )}
 
-          {/* Actions */}
+          {/* Action buttons */}
           <div className="flex gap-3 mt-6">
             <a
               href={directionsUrl}
@@ -157,24 +177,23 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
                 Website
               </a>
             )}
-            <button
-              onClick={() => {
-                const url = window.location.href
-                if (navigator.share) {
-                  navigator.share({ title: venue.name, url }).catch(() => {})
-                } else {
-                  navigator.clipboard.writeText(url).catch(() => {})
-                }
-              }}
+            <ShareButton
+              url={`${typeof window !== 'undefined' ? window.location.origin : ''}/venue/${venue.slug}`}
+              title={`${venue.name} — SunSpot Halifax`}
+              text={`${sunStatusText} at ${venue.name}`}
               className="px-4 py-3 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Share
-            </button>
+            />
           </div>
+
+          {/* Confidence label */}
+          <p className="text-xs text-gray-400 mt-4 text-center">
+            📍 Patio location:{' '}
+            {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
+          </p>
         </div>
 
-        {/* Lazy-loaded map */}
-        <div className="mt-6 h-64 bg-gray-100">
+        {/* Lazy-loaded map below the fold */}
+        <div className="h-64 bg-gray-100 border-t border-gray-100">
           <Suspense fallback={<MapSkeleton />}>
             <Map
               venues={[venue]}

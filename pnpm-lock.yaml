@@ -17,6 +17,9 @@ importers:
       mapbox-gl:
         specifier: ^3.20.0
         version: 3.20.0
+      mapbox-gl-shadow-simulator:
+        specifier: ^0.68.2
+        version: 0.68.2
       next:
         specifier: ^16.2.1
         version: 16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1892,6 +1895,9 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  mapbox-gl-shadow-simulator@0.68.2:
+    resolution: {integrity: sha512-8VzNDMM7S1lxdGo9ARO4PsncafOZqW6wbi5Tfv8j53zz8p+FpHs+SrFPJlq1OgmFvSYE30Zqzpb9nG6S5BdL6w==}
 
   mapbox-gl@3.20.0:
     resolution: {integrity: sha512-+rVQkf6ymUlAEJiQBZy0OiamJvQN4Uk15mRHI98PRUSmRS40GOoLJyEZEG39LEUtvmzc7qGh+4ygZfJ//O5VnQ==}
@@ -4391,6 +4397,10 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  mapbox-gl-shadow-simulator@0.68.2:
+    dependencies:
+      suncalc: 1.9.0
 
   mapbox-gl@3.20.0:
     dependencies:
