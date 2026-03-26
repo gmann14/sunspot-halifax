@@ -1,7 +1,7 @@
 # SunSpot Halifax — Tasks
 
 > Source of truth for project status. Updated after every work session.
-> Last updated: 2026-03-24
+> Last updated: 2026-03-26
 
 ## Phase 0: Validation Spike ✅ DONE
 - [x] Validate building footprint + height coverage for downtown Halifax bbox
@@ -32,18 +32,19 @@
 - [ ] Cross-reference with OSM `outdoor_seating` tag
 - [ ] Review keyword scan of Google Places reviews
 
-## Phase 3: Forecast Engine + Filters — ~70% done
+## Phase 3: Forecast Engine + Filters ✅ DONE
 - [x] `src/lib/forecast-engine.ts` — SunCalc + PostGIS obstruction algorithm
 - [x] Bearing conversion, 500m ray, height coverage check, angular elevation
 - [x] API route: `POST /api/forecast` (mode=full or mode=current)
 - [x] API route: `POST /api/forecast/cleanup` (nightly stale row deletion)
 - [x] `vercel.json` cron for 3am UTC cleanup
-- [x] 13 tests for forecast geometry helpers (43 total tests passing)
-- [ ] Wire filters in frontend: Sunny Now, Hide Closed, Venue Type, Sort
-- [ ] Implement Best Match sort algorithm (sun time remaining → next sun window → distance)
-- [ ] Add text search (client-side filter on venue name)
-- [ ] Add "no filter results" empty state
-- [ ] Bottom venue list sorted by remaining sun time, with distance
+- [x] 13 tests for forecast geometry helpers (51 total tests passing)
+- [x] Wire filters in frontend: Sunny Now, Hide Closed, Venue Type, Sort
+- [x] Implement Best Match sort algorithm (sun time remaining → next sun window → distance)
+- [x] Add text search (client-side filter on venue name)
+- [x] Add "no filter results" empty state
+- [x] Bottom venue list sorted by remaining sun time, with distance
+- [x] Client-side venue status recomputation when time slider changes
 
 ## Phase 4: Map + Venue Details — ~60% done
 - [x] Map component with Mapbox GL
@@ -73,7 +74,7 @@
 - GitHub: `gmann14/sunspot-halifax`
 - Supabase: local dev RUNNING (Docker), 780 buildings + 49 venues + 2,450 forecasts loaded
 - `.env.local`: Mapbox token ✅, Google Places API key ✅, Supabase local keys ✅
-- 43 tests passing, TypeScript clean (`npx tsc --noEmit`)
+- 51 tests passing, TypeScript clean (`npx tsc --noEmit`)
 - Deployed to Vercel: https://sunspot-halifax.vercel.app (needs cloud Supabase for production data)
 - 8 git commits total
 

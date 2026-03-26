@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, Suspense, lazy } from 'react'
 import type { VenueWithForecast, WeatherData, FilterState } from '@/types'
 import { getCurrentSlot, isSunUp } from '@/lib/suncalc-helpers'
-import { sortByBestMatch, haversineDistance, isVenueOpen } from '@/lib/venues'
+import { sortByBestMatch, haversineDistance, isVenueOpen, continuousSunMinutes, nextSunWindow } from '@/lib/venues'
 import WeatherBanner from '@/components/WeatherBanner'
 import TimeSlider from '@/components/TimeSlider'
 import FilterBar from '@/components/FilterBar'
@@ -38,9 +38,38 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
 
   const sunIsDown = !isSunUp(selectedTime)
 
+  // Recompute venue sun statuses for the selected time slot
+  const venuesAtTime = useMemo(() => {
+    return venues.map((venue) => {
+      const forecasts = venue.forecasts ?? []
+      const currentForecast = forecasts.find((f) => {
+        const fSlot = new Date(f.slot_starts_at)
+        return Math.abs(fSlot.getTime() - selectedTime.getTime()) < 15 * 60 * 1000
+      })
+
+      const status = currentForecast?.status ?? 'unknown'
+      const sunMins = status === 'sun'
+        ? continuousSunMinutes(forecasts, selectedTime)
+        : 0
+      const nextSun = status !== 'sun'
+        ? nextSunWindow(forecasts, selectedTime)
+        : null
+
+      return {
+        ...venue,
+        current_status: status,
+        current_confidence: currentForecast?.confidence ?? venue.patio_confidence,
+        continuous_sun_minutes: sunMins,
+        minutes_until_sun: nextSun
+          ? Math.round((nextSun.getTime() - selectedTime.getTime()) / 60000)
+          : null,
+      }
+    })
+  }, [venues, selectedTime])
+
   // Filter venues
   const filteredVenues = useMemo(() => {
-    let result = venues
+    let result: VenueWithForecast[] = venuesAtTime
 
     // Text search
     if (filters.searchQuery) {
@@ -75,14 +104,14 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
     }
 
     return result
-  }, [venues, filters, selectedTime, userLocation])
+  }, [venuesAtTime, filters, selectedTime, userLocation])
 
   const allInShade = useMemo(
     () =>
-      venues.length > 0 &&
-      venues.every((v) => v.current_status !== 'sun') &&
+      venuesAtTime.length > 0 &&
+      venuesAtTime.every((v) => v.current_status !== 'sun') &&
       !sunIsDown,
-    [venues, sunIsDown]
+    [venuesAtTime, sunIsDown]
   )
 
   const hasActiveFilters =
