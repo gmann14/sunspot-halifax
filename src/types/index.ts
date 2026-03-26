@@ -92,4 +92,5 @@ export interface FilterState {
   venueTypes: VenueType[]
   sortBy: SortOption
   searchQuery: string
+  favoritesOnly: boolean
 }

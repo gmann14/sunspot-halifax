@@ -1,17 +1,20 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { VenueWithForecast } from '@/types'
 import { formatPriceLevel, isVenueOpen, formatWalkingTime } from '@/lib/venues'
 import { formatTimeAT } from '@/lib/suncalc-helpers'
 import ForecastBar from './ForecastBar'
 import ShareButton from './ShareButton'
+import ReportProblemModal from './ReportProblemModal'
 
 interface VenueDetailSheetProps {
   venue: VenueWithForecast | null
   onClose: () => void
   distanceMeters?: number
   selectedTime: Date
+  isFavorite?: boolean
+  onToggleFavorite?: (venueId: string) => void
 }
 
 export default function VenueDetailSheet({
@@ -19,10 +22,13 @@ export default function VenueDetailSheet({
   onClose,
   distanceMeters,
   selectedTime,
+  isFavorite,
+  onToggleFavorite,
 }: VenueDetailSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null)
   const startY = useRef(0)
   const currentY = useRef(0)
+  const [reportOpen, setReportOpen] = useState(false)
 
   useEffect(() => {
     if (!venue) return
@@ -120,8 +126,21 @@ export default function VenueDetailSheet({
             </div>
           )}
 
-          {/* Name + status */}
-          <h2 className="text-xl font-bold">{venue.name}</h2>
+          {/* Name + favorite */}
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-xl font-bold">{venue.name}</h2>
+            {onToggleFavorite && (
+              <button
+                onClick={() => onToggleFavorite(venue.id)}
+                className="p-1 min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+                aria-label={isFavorite ? `Remove ${venue.name} from favorites` : `Add ${venue.name} to favorites`}
+              >
+                <span className={`text-xl ${isFavorite ? 'text-red-500' : 'text-gray-300'}`}>
+                  {isFavorite ? '♥' : '♡'}
+                </span>
+              </button>
+            )}
+          </div>
           <p
             className={`text-sm mt-1 font-medium ${
               isSunny ? 'text-amber-600' : 'text-gray-500'
@@ -219,13 +238,30 @@ export default function VenueDetailSheet({
             />
           </div>
 
-          {/* Confidence label */}
-          <p className="text-xs text-gray-400 mt-4 text-center">
-            📍 Patio location:{' '}
-            {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
-          </p>
+          {/* Confidence + report */}
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-xs text-gray-400">
+              📍 Patio location:{' '}
+              {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
+            </p>
+            <button
+              onClick={() => setReportOpen(true)}
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Report a problem
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Report modal */}
+      {reportOpen && (
+        <ReportProblemModal
+          venue={venue}
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { VenueWithForecast } from '@/types'
 import { formatPriceLevel, isVenueOpen } from '@/lib/venues'
@@ -8,6 +8,9 @@ import { formatTimeAT, getCurrentSlot, isPatioSeason } from '@/lib/suncalc-helpe
 import ForecastBar from '@/components/ForecastBar'
 import { MapSkeleton } from '@/components/LoadingSkeleton'
 import ShareButton from '@/components/ShareButton'
+import ReportProblemModal from '@/components/ReportProblemModal'
+import { useFavorites } from '@/lib/use-favorites'
+import { useRecentlyViewed } from '@/lib/use-recently-viewed'
 
 const Map = lazy(() => import('@/components/Map'))
 
@@ -20,6 +23,14 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
   const isOpen = isVenueOpen(venue, now)
   const isSunny = venue.current_status === 'sun'
   const offSeason = !isPatioSeason(now)
+  const [reportOpen, setReportOpen] = useState(false)
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const { addRecentlyViewed } = useRecentlyViewed()
+
+  // Track this venue as recently viewed
+  useEffect(() => {
+    addRecentlyViewed(venue.id)
+  }, [venue.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const sunStatusText = (() => {
     if (isSunny && venue.continuous_sun_minutes) {
@@ -84,14 +95,25 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
         )}
 
         <div className="px-4 py-4">
-          {/* Name + rating */}
+          {/* Name + rating + favorite */}
           <div className="flex items-start justify-between gap-3">
             <h1 className="text-2xl font-bold leading-tight">{venue.name}</h1>
-            {venue.rating && (
-              <span className="shrink-0 text-sm font-medium bg-amber-50 text-amber-700 px-2 py-1 rounded">
-                ⭐ {venue.rating}
-              </span>
-            )}
+            <div className="flex items-center gap-1 shrink-0">
+              {venue.rating && (
+                <span className="text-sm font-medium bg-amber-50 text-amber-700 px-2 py-1 rounded">
+                  ⭐ {venue.rating}
+                </span>
+              )}
+              <button
+                onClick={() => toggleFavorite(venue.id)}
+                className="p-1 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                aria-label={isFavorite(venue.id) ? `Remove ${venue.name} from favorites` : `Add ${venue.name} to favorites`}
+              >
+                <span className={`text-xl ${isFavorite(venue.id) ? 'text-red-500' : 'text-gray-300'}`}>
+                  {isFavorite(venue.id) ? '♥' : '♡'}
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Meta row */}
@@ -185,11 +207,19 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
             />
           </div>
 
-          {/* Confidence label */}
-          <p className="text-xs text-gray-400 mt-4 text-center">
-            📍 Patio location:{' '}
-            {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
-          </p>
+          {/* Confidence + report */}
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-xs text-gray-400">
+              📍 Patio location:{' '}
+              {venue.patio_confidence === 'verified' ? 'Verified' : 'Estimated'}
+            </p>
+            <button
+              onClick={() => setReportOpen(true)}
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Report a problem
+            </button>
+          </div>
         </div>
 
         {/* Lazy-loaded map below the fold */}
@@ -204,6 +234,14 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
           </Suspense>
         </div>
       </main>
+
+      {reportOpen && (
+        <ReportProblemModal
+          venue={venue}
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </div>
   )
 }

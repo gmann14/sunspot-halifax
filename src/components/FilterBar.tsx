@@ -9,6 +9,7 @@ interface FilterBarProps {
   selectedTime: Date
   isNow: boolean
   hasLocation: boolean
+  hasFavorites?: boolean
 }
 
 const VENUE_TYPES: { value: VenueType; label: string }[] = [
@@ -24,6 +25,7 @@ export default function FilterBar({
   selectedTime,
   isNow,
   hasLocation,
+  hasFavorites,
 }: FilterBarProps) {
   const sunnyLabel = isNow
     ? 'Sunny Now'
@@ -42,6 +44,10 @@ export default function FilterBar({
       ? filters.venueTypes.filter((t) => t !== type)
       : [...filters.venueTypes, type]
     onChange({ ...filters, venueTypes: types })
+  }
+
+  function toggleFavorites() {
+    onChange({ ...filters, favoritesOnly: !filters.favoritesOnly })
   }
 
   function setSort(sortBy: FilterState['sortBy']) {
@@ -75,6 +81,21 @@ export default function FilterBar({
       >
         Hide Closed
       </button>
+
+      {/* My Favorites */}
+      {hasFavorites && (
+        <button
+          onClick={toggleFavorites}
+          className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            filters.favoritesOnly
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+          aria-pressed={filters.favoritesOnly}
+        >
+          ♥ Favorites
+        </button>
+      )}
 
       {/* Venue type chips */}
       {VENUE_TYPES.map((vt) => (

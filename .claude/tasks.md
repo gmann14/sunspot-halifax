@@ -57,18 +57,28 @@
 - [x] Share functionality (ShareButton component: Web Share API + clipboard fallback with "Copied!" toast)
 - [x] `/venue/[slug]` SSR detail page polish (standalone, lazy-load map, branding header, off-season banner)
 - [x] Mobile-responsive polish (44px touch targets, proper tap areas)
-- [ ] Inline onboarding tooltips (first visit only) — deferred to Phase 5
+- [ ] Inline onboarding tooltips (first visit only) — deferred to Phase 6
 - [x] Empty states: no venues nearby (neighborhood buttons), all in shade (banner + venue list), after sunset, off-season banner, venue not found (404 page)
 - [x] Off-season banner on home page (outside May-October)
 
-## Phase 5: Community + Deploy — not started
-- [ ] "Suggest a Patio" submission form
-- [ ] "Report a Problem" on venue cards
-- [ ] Favorites + Recently Viewed (localStorage)
+## Phase 5: Community Features ✅ DONE
+- [x] "Suggest a Patio" submission form (SuggestPatioModal) — modal with name, address, notes, honeypot
+- [x] "Report a Problem" on venue cards (ReportProblemModal) — correction or closure report
+- [x] Toast notification system (ToastProvider + useToast hook) — success/error toasts
+- [x] Favorites (localStorage) — heart icon on VenueCard + VenueDetailSheet, "♥ Favorites" filter chip
+- [x] Recently Viewed (localStorage) — last 10 venues, shown below main list when no filters active
+- [x] SEO: enhanced meta tags (title template, metadataBase, Twitter cards, canonical URLs)
+- [x] JSON-LD structured data (LocalBusiness schema) on venue detail pages
+- [x] Dynamic OG images per venue (already existed from Phase 4, enhanced with metadata)
+- [x] Sitemap generation (`/sitemap.xml`) — all venue slugs + static pages
+- [x] `robots.txt` generation — allows crawling, blocks `/api/`
+- [x] 17 new tests (68 total passing), TypeScript clean
+
+## Phase 6: Deploy + Launch — not started
 - [ ] Accessibility audit
 - [ ] Analytics setup (Vercel Analytics + custom events)
 - [ ] Deploy to Vercel (already linked: prj_LcsbHf8EDIBVPJBzXKVveoT7LWDY)
-- [ ] SEO: meta tags, sitemap, OG images
+- [ ] Inline onboarding tooltips (first visit only)
 - [ ] Launch: r/halifax, Halifax Twitter, local Facebook groups
 
 ## Infra / Config
@@ -76,17 +86,29 @@
 - GitHub: `gmann14/sunspot-halifax`
 - Supabase: local dev RUNNING (Docker), 780 buildings + 49 venues + 2,450 forecasts loaded
 - `.env.local`: Mapbox token ✅, Google Places API key ✅, Supabase local keys ✅
-- 51 tests passing, TypeScript clean (`npx tsc --noEmit`)
+- 68 tests passing, TypeScript clean (`npx tsc --noEmit`)
 - Deployed to Vercel: https://sunspot-halifax.vercel.app (needs cloud Supabase for production data)
-- 8 git commits total
+- 9 git commits total
 
 ## Recent Progress (2026-03-26)
+- [x] Phase 5 complete: Community features, SEO, sitemap
+- [x] SuggestPatioModal: name + address + notes form, honeypot, posts to /api/submissions
+- [x] ReportProblemModal: correction/closure radio, details, posts to /api/submissions with venue_id
+- [x] ToastProvider: context-based toast system, success/error variants, 3s auto-dismiss
+- [x] Favorites: useFavorites hook (localStorage), heart icons on cards + detail sheets, filter chip
+- [x] Recently Viewed: useRecentlyViewed hook (localStorage, max 10), section below venue list
+- [x] JSON-LD LocalBusiness schema on /venue/[slug] pages
+- [x] Sitemap: dynamic /sitemap.xml with all venue slugs
+- [x] robots.txt: allows /, blocks /api/
+- [x] Enhanced metadata: title template, metadataBase, canonical URLs, Twitter cards, OG images
+- [x] 68 tests passing, TypeScript clean
+
+## Earlier Progress (2026-03-26)
 - [x] Phase 4 complete: Map rewritten with GeoJSON clustering + shadow overlay
 - [x] ShareButton component: Web Share API with clipboard "Copied!" feedback
 - [x] Venue detail page polished: standalone usable, branding header, off-season support
 - [x] Empty states: all in shade (shows venue list below banner), off-season, sun down, no venues nearby
 - [x] Mobile-responsive: 44px touch targets on search/close buttons
-- [x] 51 tests passing, TypeScript clean
 
 ## Earlier Progress (2026-03-24)
 - [x] OSM Overpass building height enrichment: 21.4% → 99.5% height coverage (scripts/enrich-heights.ts)

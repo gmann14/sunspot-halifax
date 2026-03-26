@@ -10,6 +10,8 @@ interface VenueCardProps {
   onClick: () => void
   distanceMeters?: number
   selectedTime: Date
+  isFavorite?: boolean
+  onToggleFavorite?: (venueId: string) => void
 }
 
 export default function VenueCard({
@@ -17,6 +19,8 @@ export default function VenueCard({
   onClick,
   distanceMeters,
   selectedTime,
+  isFavorite,
+  onToggleFavorite,
 }: VenueCardProps) {
   const isOpen = isVenueOpen(venue, selectedTime)
   const isSunny = venue.current_status === 'sun'
@@ -76,13 +80,29 @@ export default function VenueCard({
             </div>
           )}
         </div>
-        <div className="text-right shrink-0">
-          {distanceMeters !== undefined && (
-            <span className="text-xs text-gray-400">
-              {formatWalkingTime(distanceMeters)} 🚶
-            </span>
+        <div className="flex items-start gap-1 shrink-0">
+          <div className="text-right">
+            {distanceMeters !== undefined && (
+              <span className="text-xs text-gray-400">
+                {formatWalkingTime(distanceMeters)} 🚶
+              </span>
+            )}
+            <div className="text-[10px] text-gray-400 mt-0.5">{typeBadge}</div>
+          </div>
+          {onToggleFavorite && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleFavorite(venue.id)
+              }}
+              className="p-1 -mr-1 min-w-[28px] min-h-[28px] flex items-center justify-center"
+              aria-label={isFavorite ? `Remove ${venue.name} from favorites` : `Add ${venue.name} to favorites`}
+            >
+              <span className={`text-base ${isFavorite ? 'text-red-500' : 'text-gray-300'}`}>
+                {isFavorite ? '♥' : '♡'}
+              </span>
+            </button>
           )}
-          <div className="text-[10px] text-gray-400 mt-0.5">{typeBadge}</div>
         </div>
       </div>
     </button>

@@ -10,7 +10,10 @@ import FilterBar from '@/components/FilterBar'
 import SearchBar from '@/components/SearchBar'
 import VenueList from '@/components/VenueList'
 import VenueDetailSheet from '@/components/VenueDetailSheet'
+import SuggestPatioModal from '@/components/SuggestPatioModal'
 import { MapSkeleton, VenueListSkeleton } from '@/components/LoadingSkeleton'
+import { useFavorites } from '@/lib/use-favorites'
+import { useRecentlyViewed } from '@/lib/use-recently-viewed'
 
 const Map = lazy(() => import('@/components/Map'))
 
@@ -34,7 +37,12 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
     venueTypes: [],
     sortBy: 'best_match',
     searchQuery: '',
+    favoritesOnly: false,
   })
+  const [suggestOpen, setSuggestOpen] = useState(false)
+
+  const { favorites, toggleFavorite, isFavorite } = useFavorites()
+  const { recentIds, addRecentlyViewed } = useRecentlyViewed()
 
   const sunIsDown = !isSunUp(selectedTime)
   const offSeason = !isPatioSeason(selectedTime)
@@ -78,6 +86,11 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
       result = result.filter((v) => v.name.toLowerCase().includes(q))
     }
 
+    // Favorites only
+    if (filters.favoritesOnly) {
+      result = result.filter((v) => favorites.includes(v.id))
+    }
+
     // Sunny Now
     if (filters.sunnyNow) {
       result = result.filter((v) => v.current_status === 'sun')
@@ -105,7 +118,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
     }
 
     return result
-  }, [venuesAtTime, filters, selectedTime, userLocation])
+  }, [venuesAtTime, filters, selectedTime, userLocation, favorites])
 
   const allInShade = useMemo(
     () =>
@@ -119,7 +132,8 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
     filters.sunnyNow ||
     !filters.hideClosed ||
     filters.venueTypes.length > 0 ||
-    filters.searchQuery.length > 0
+    filters.searchQuery.length > 0 ||
+    filters.favoritesOnly
 
   const handleTimeChange = useCallback((time: Date) => {
     setSelectedTime(time)
@@ -156,8 +170,25 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
       venueTypes: [],
       sortBy: 'best_match',
       searchQuery: '',
+      favoritesOnly: false,
     })
   }, [])
+
+  const handleVenueClick = useCallback((venue: VenueWithForecast) => {
+    setSelectedVenue(venue)
+    addRecentlyViewed(venue.id)
+  }, [addRecentlyViewed])
+
+  // Build recently viewed venue list
+  const recentlyViewedVenues = useMemo((): VenueWithForecast[] => {
+    if (recentIds.length === 0) return []
+    const result: VenueWithForecast[] = []
+    for (const id of recentIds) {
+      const v = venuesAtTime.find((venue) => venue.id === id)
+      if (v) result.push(v)
+    }
+    return result
+  }, [recentIds, venuesAtTime])
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden">
@@ -184,6 +215,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
           selectedTime={selectedTime}
           isNow={isNow}
           hasLocation={!!userLocation}
+          hasFavorites={favorites.length > 0}
         />
       </header>
 
@@ -193,7 +225,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
           <Map
             venues={filteredVenues}
             selectedVenue={selectedVenue}
-            onVenueClick={setSelectedVenue}
+            onVenueClick={handleVenueClick}
             onMapInteraction={handleMapInteraction}
             selectedTime={selectedTime}
           />
@@ -215,18 +247,54 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
         {venues.length === 0 ? (
           <VenueListSkeleton />
         ) : (
-          <VenueList
-            venues={filteredVenues}
-            onVenueClick={setSelectedVenue}
-            userLat={userLocation?.lat}
-            userLng={userLocation?.lng}
-            selectedTime={selectedTime}
-            isEmpty={filteredVenues.length === 0}
-            hasFilters={hasActiveFilters}
-            onClearFilters={handleClearFilters}
-            allInShade={allInShade}
-            sunIsDown={sunIsDown}
-          />
+          <>
+            <VenueList
+              venues={filteredVenues}
+              onVenueClick={handleVenueClick}
+              userLat={userLocation?.lat}
+              userLng={userLocation?.lng}
+              selectedTime={selectedTime}
+              isEmpty={filteredVenues.length === 0}
+              hasFilters={hasActiveFilters}
+              onClearFilters={handleClearFilters}
+              allInShade={allInShade}
+              sunIsDown={sunIsDown}
+              isFavorite={isFavorite}
+              onToggleFavorite={toggleFavorite}
+            />
+
+            {/* Recently Viewed */}
+            {recentlyViewedVenues.length > 0 && !hasActiveFilters && (
+              <div className="border-t border-gray-100">
+                <h3 className="px-4 pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Recently Viewed
+                </h3>
+                <VenueList
+                  venues={recentlyViewedVenues}
+                  onVenueClick={handleVenueClick}
+                  userLat={userLocation?.lat}
+                  userLng={userLocation?.lng}
+                  selectedTime={selectedTime}
+                  isEmpty={false}
+                  hasFilters={false}
+                  allInShade={false}
+                  sunIsDown={false}
+                  isFavorite={isFavorite}
+                  onToggleFavorite={toggleFavorite}
+                />
+              </div>
+            )}
+
+            {/* Suggest a Patio */}
+            <div className="px-4 py-4 border-t border-gray-100 text-center">
+              <button
+                onClick={() => setSuggestOpen(true)}
+                className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+              >
+                + Suggest a Patio
+              </button>
+            </div>
+          </>
         )}
       </div>
 
@@ -245,6 +313,14 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
             : undefined
         }
         selectedTime={selectedTime}
+        isFavorite={selectedVenue ? isFavorite(selectedVenue.id) : false}
+        onToggleFavorite={toggleFavorite}
+      />
+
+      {/* Suggest a Patio Modal */}
+      <SuggestPatioModal
+        open={suggestOpen}
+        onClose={() => setSuggestOpen(false)}
       />
     </div>
   )

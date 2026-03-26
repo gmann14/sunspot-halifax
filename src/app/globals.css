@@ -64,10 +64,22 @@ body {
   opacity: 0.3;
 }
 
+/* Slide-up animation for modals */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 250ms ease-out;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .bottom-sheet-enter-active,
   .bottom-sheet-exit-active {
     transition: none;
+  }
+  .animate-slide-up {
+    animation: none;
   }
 }

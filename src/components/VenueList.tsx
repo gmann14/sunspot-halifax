@@ -16,6 +16,8 @@ interface VenueListProps {
   onClearFilters?: () => void
   allInShade?: boolean
   sunIsDown?: boolean
+  isFavorite?: (venueId: string) => boolean
+  onToggleFavorite?: (venueId: string) => void
 }
 
 function VenueCards({
@@ -24,12 +26,16 @@ function VenueCards({
   userLat,
   userLng,
   selectedTime,
+  isFavorite,
+  onToggleFavorite,
 }: {
   venues: VenueWithForecast[]
   onVenueClick: (venue: VenueWithForecast) => void
   userLat?: number
   userLng?: number
   selectedTime: Date
+  isFavorite?: (venueId: string) => boolean
+  onToggleFavorite?: (venueId: string) => void
 }) {
   return (
     <div className="divide-y divide-gray-50">
@@ -46,6 +52,8 @@ function VenueCards({
             onClick={() => onVenueClick(venue)}
             distanceMeters={distance}
             selectedTime={selectedTime}
+            isFavorite={isFavorite?.(venue.id)}
+            onToggleFavorite={onToggleFavorite}
           />
         )
       })}
@@ -64,6 +72,8 @@ export default function VenueList({
   onClearFilters,
   allInShade,
   sunIsDown,
+  isFavorite,
+  onToggleFavorite,
 }: VenueListProps) {
   // Sun down — show message only
   if (sunIsDown) {
@@ -127,6 +137,8 @@ export default function VenueList({
           userLat={userLat}
           userLng={userLng}
           selectedTime={selectedTime}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
         />
       </>
     )
