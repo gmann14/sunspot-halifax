@@ -58,7 +58,7 @@ export default function VenueDetailPage({ venue }: VenueDetailPageProps) {
   const typeBadge = venue.type.charAt(0).toUpperCase() + venue.type.slice(1)
 
   return (
-    <div className="min-h-dvh bg-gray-50">
+    <div id="main-content" className="min-h-dvh bg-gray-50">
       {/* Sticky header */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-100">
         <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">

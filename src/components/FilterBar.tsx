@@ -2,6 +2,7 @@
 
 import type { FilterState, VenueType } from '@/types'
 import { formatTimeAT } from '@/lib/suncalc-helpers'
+import { trackEvent } from '@/lib/analytics'
 
 interface FilterBarProps {
   filters: FilterState
@@ -10,6 +11,8 @@ interface FilterBarProps {
   isNow: boolean
   hasLocation: boolean
   hasFavorites?: boolean
+  showSunnyTooltip?: boolean
+  onSunnyTooltipDismiss?: () => void
 }
 
 const VENUE_TYPES: { value: VenueType; label: string }[] = [
@@ -26,6 +29,8 @@ export default function FilterBar({
   isNow,
   hasLocation,
   hasFavorites,
+  showSunnyTooltip,
+  onSunnyTooltipDismiss,
 }: FilterBarProps) {
   const sunnyLabel = isNow
     ? 'Sunny Now'
@@ -33,10 +38,13 @@ export default function FilterBar({
 
   function toggleSunny() {
     onChange({ ...filters, sunnyNow: !filters.sunnyNow })
+    trackEvent('filter_toggle', { filter: 'sunny_now', enabled: !filters.sunnyNow })
+    onSunnyTooltipDismiss?.()
   }
 
   function toggleHideClosed() {
     onChange({ ...filters, hideClosed: !filters.hideClosed })
+    trackEvent('filter_toggle', { filter: 'hide_closed', enabled: !filters.hideClosed })
   }
 
   function toggleVenueType(type: VenueType) {
@@ -44,30 +52,40 @@ export default function FilterBar({
       ? filters.venueTypes.filter((t) => t !== type)
       : [...filters.venueTypes, type]
     onChange({ ...filters, venueTypes: types })
+    trackEvent('filter_toggle', { filter: `type_${type}`, enabled: !filters.venueTypes.includes(type) })
   }
 
   function toggleFavorites() {
     onChange({ ...filters, favoritesOnly: !filters.favoritesOnly })
+    trackEvent('filter_toggle', { filter: 'favorites', enabled: !filters.favoritesOnly })
   }
 
   function setSort(sortBy: FilterState['sortBy']) {
     onChange({ ...filters, sortBy })
+    trackEvent('filter_toggle', { filter: 'sort', enabled: sortBy !== 'best_match' })
   }
 
   return (
-    <div className="filter-scroll flex items-center gap-2 px-4 py-2 overflow-x-auto bg-white border-b border-gray-100">
+    <div className="filter-scroll flex items-center gap-2 px-4 py-2 overflow-x-auto bg-white border-b border-gray-100 relative">
       {/* Sunny Now toggle */}
-      <button
-        onClick={toggleSunny}
-        className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-          filters.sunnyNow
-            ? 'bg-amber-500 text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-        }`}
-        aria-pressed={filters.sunnyNow}
-      >
-        ☀️ {sunnyLabel}
-      </button>
+      <div className="relative shrink-0">
+        <button
+          onClick={toggleSunny}
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            filters.sunnyNow
+              ? 'bg-amber-500 text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+          aria-pressed={filters.sunnyNow}
+        >
+          ☀️ {sunnyLabel}
+        </button>
+        {showSunnyTooltip && (
+          <div className="onboarding-tooltip" style={{ top: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)' }}>
+            Show only venues in sunlight
+          </div>
+        )}
+      </div>
 
       {/* Hide Closed toggle */}
       <button

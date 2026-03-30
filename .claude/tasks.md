@@ -32,9 +32,9 @@ Phases 0 through 5 are complete. Summary:
 
 ### 🤖 Automatable Tasks (Claude can do these)
 
-- [ ] **Accessibility audit + fixes** — keyboard nav, aria labels, screen reader testing, color contrast, `prefers-reduced-motion`
-- [ ] **Analytics integration** — add Vercel Analytics (`@vercel/analytics`) + custom event tracking (venue_tap, filter_toggle, share_tap, time_slider_scrub, submission_start, empty_state_shown)
-- [ ] **Inline onboarding tooltips** — first-visit-only tooltips on time slider, first venue pin, Sunny Now filter (deferred from Phase 4)
+- [x] **Accessibility audit + fixes** — skip-to-content link, aria-labelledby on all modals, focus-visible outlines, prefers-reduced-motion, viewport zoom fix, main-content IDs
+- [x] **Analytics integration** — Vercel Analytics + SpeedInsights installed; custom events: venue_tap, filter_toggle, share_tap, time_slider_scrub, submission_start, empty_state_shown, webgl_fallback
+- [x] **Inline onboarding tooltips** — first-visit-only tooltips on time slider + Sunny Now filter via useOnboarding hook + localStorage
 - [ ] **OSM outdoor_seating cross-reference** — script to match OSM `outdoor_seating=yes` tags to existing venues for data quality (deferred from Phase 2)
 - [ ] **Google review keyword scan** — scan venue reviews for patio keywords to improve patio confidence (deferred from Phase 2)
 

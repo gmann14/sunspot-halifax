@@ -14,6 +14,8 @@ import SuggestPatioModal from '@/components/SuggestPatioModal'
 import { MapSkeleton, VenueListSkeleton } from '@/components/LoadingSkeleton'
 import { useFavorites } from '@/lib/use-favorites'
 import { useRecentlyViewed } from '@/lib/use-recently-viewed'
+import { useOnboarding } from '@/lib/use-onboarding'
+import { trackEvent } from '@/lib/analytics'
 
 const Map = lazy(() => import('@/components/Map'))
 
@@ -43,6 +45,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
 
   const { favorites, toggleFavorite, isFavorite } = useFavorites()
   const { recentIds, addRecentlyViewed } = useRecentlyViewed()
+  const onboarding = useOnboarding()
 
   const sunIsDown = !isSunUp(selectedTime)
   const offSeason = !isPatioSeason(selectedTime)
@@ -138,7 +141,9 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
   const handleTimeChange = useCallback((time: Date) => {
     setSelectedTime(time)
     setIsNow(false)
-  }, [])
+    trackEvent('time_slider_scrub')
+    onboarding.dismiss('time_slider')
+  }, [onboarding])
 
   const handleNowClick = useCallback(() => {
     setSelectedTime(getCurrentSlot())
@@ -177,6 +182,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
   const handleVenueClick = useCallback((venue: VenueWithForecast) => {
     setSelectedVenue(venue)
     addRecentlyViewed(venue.id)
+    trackEvent('venue_tap', { venue_name: venue.name, venue_type: venue.type })
   }, [addRecentlyViewed])
 
   // Build recently viewed venue list
@@ -191,7 +197,7 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
   }, [recentIds, venuesAtTime])
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden">
+    <div id="main-content" className="flex flex-col h-dvh overflow-hidden">
       {/* Header */}
       <header className="shrink-0">
         <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
@@ -216,6 +222,8 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
           isNow={isNow}
           hasLocation={!!userLocation}
           hasFavorites={favorites.length > 0}
+          showSunnyTooltip={onboarding.shouldShow('sunny_now')}
+          onSunnyTooltipDismiss={() => onboarding.dismiss('sunny_now')}
         />
       </header>
 
@@ -233,13 +241,18 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
       </div>
 
       {/* Time Slider */}
-      <div className="shrink-0">
+      <div className="shrink-0 relative">
         <TimeSlider
           value={selectedTime}
           onChange={handleTimeChange}
           onNowClick={handleNowClick}
           isNow={isNow}
         />
+        {onboarding.shouldShow('time_slider') && (
+          <div className="onboarding-tooltip" style={{ bottom: -36, left: '50%', transform: 'translateX(-50%)' }}>
+            Drag to see how shadows move
+          </div>
+        )}
       </div>
 
       {/* Venue List */}
@@ -288,7 +301,10 @@ export default function HomeClient({ initialVenues }: HomeClientProps) {
             {/* Suggest a Patio */}
             <div className="px-4 py-4 border-t border-gray-100 text-center">
               <button
-                onClick={() => setSuggestOpen(true)}
+                onClick={() => {
+                  setSuggestOpen(true)
+                  trackEvent('submission_start')
+                }}
                 className="text-sm text-amber-600 hover:text-amber-700 font-medium"
               >
                 + Suggest a Patio

@@ -62,7 +62,7 @@ export default function ReportProblemModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[60]" aria-modal="true" role="dialog">
+    <div className="fixed inset-0 z-[60]" aria-modal="true" role="dialog" aria-labelledby="report-modal-title">
       <div
         className="absolute inset-0 bg-black/30"
         onClick={onClose}
@@ -74,7 +74,7 @@ export default function ReportProblemModal({
         </div>
 
         <form onSubmit={handleSubmit} className="px-4 pb-6">
-          <h2 className="text-lg font-bold mb-1">Report a Problem</h2>
+          <h2 id="report-modal-title" className="text-lg font-bold mb-1">Report a Problem</h2>
           <p className="text-sm text-gray-500 mb-4">{venue.name}</p>
 
           <fieldset>

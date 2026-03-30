@@ -92,7 +92,7 @@ export default function VenueDetailSheet({
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.lat},${venue.lng}`
 
   return (
-    <div className="fixed inset-0 z-50" aria-modal="true" role="dialog">
+    <div className="fixed inset-0 z-50" aria-modal="true" role="dialog" aria-labelledby="venue-sheet-title">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/20"
@@ -128,7 +128,7 @@ export default function VenueDetailSheet({
 
           {/* Name + favorite */}
           <div className="flex items-start justify-between gap-2">
-            <h2 className="text-xl font-bold">{venue.name}</h2>
+            <h2 id="venue-sheet-title" className="text-xl font-bold">{venue.name}</h2>
             {onToggleFavorite && (
               <button
                 onClick={() => onToggleFavorite(venue.id)}

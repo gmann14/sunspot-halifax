@@ -53,7 +53,7 @@ export default function SuggestPatioModal({ open, onClose }: SuggestPatioModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50" aria-modal="true" role="dialog">
+    <div className="fixed inset-0 z-50" aria-modal="true" role="dialog" aria-labelledby="suggest-modal-title">
       <div
         className="absolute inset-0 bg-black/30"
         onClick={onClose}
@@ -65,7 +65,7 @@ export default function SuggestPatioModal({ open, onClose }: SuggestPatioModalPr
         </div>
 
         <form onSubmit={handleSubmit} className="px-4 pb-6">
-          <h2 className="text-lg font-bold mb-4">Suggest a Patio</h2>
+          <h2 id="suggest-modal-title" className="text-lg font-bold mb-4">Suggest a Patio</h2>
 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Venue name <span className="text-red-500">*</span>

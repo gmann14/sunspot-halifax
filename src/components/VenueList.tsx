@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import type { VenueWithForecast } from '@/types'
 import { haversineDistance } from '@/lib/venues'
 import VenueCard from './VenueCard'
 import { NEIGHBORHOODS } from '@/lib/constants'
+import { trackEvent } from '@/lib/analytics'
 
 interface VenueListProps {
   venues: VenueWithForecast[]
@@ -75,6 +77,23 @@ export default function VenueList({
   isFavorite,
   onToggleFavorite,
 }: VenueListProps) {
+  // Track empty states for analytics
+  const emptyReason = sunIsDown
+    ? 'sun_down'
+    : isEmpty && hasFilters
+      ? 'no_filter_match'
+      : venues.length === 0
+        ? 'no_venues'
+        : allInShade
+          ? 'all_shade'
+          : null
+
+  useEffect(() => {
+    if (emptyReason) {
+      trackEvent('empty_state_shown', { reason: emptyReason })
+    }
+  }, [emptyReason])
+
   // Sun down — show message only
   if (sunIsDown) {
     return (
@@ -152,6 +171,8 @@ export default function VenueList({
       userLat={userLat}
       userLng={userLng}
       selectedTime={selectedTime}
+      isFavorite={isFavorite}
+      onToggleFavorite={onToggleFavorite}
     />
   )
 }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import type { VenueWithForecast } from '@/types'
 import { HALIFAX_CENTER, MAP_DEFAULT_ZOOM } from '@/lib/constants'
+import { trackEvent } from '@/lib/analytics'
 
 interface MapProps {
   venues: VenueWithForecast[]
@@ -61,6 +62,7 @@ export default function Map({
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
     if (!gl) {
       setWebglSupported(false)
+      trackEvent('webgl_fallback')
       return
     }
 
