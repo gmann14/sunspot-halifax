@@ -35,8 +35,8 @@ Phases 0 through 5 are complete. Summary:
 - [x] **Accessibility audit + fixes** — skip-to-content link, aria-labelledby on all modals, focus-visible outlines, prefers-reduced-motion, viewport zoom fix, main-content IDs
 - [x] **Analytics integration** — Vercel Analytics + SpeedInsights installed; custom events: venue_tap, filter_toggle, share_tap, time_slider_scrub, submission_start, empty_state_shown, webgl_fallback
 - [x] **Inline onboarding tooltips** — first-visit-only tooltips on time slider + Sunny Now filter via useOnboarding hook + localStorage
-- [ ] **OSM outdoor_seating cross-reference** — script to match OSM `outdoor_seating=yes` tags to existing venues for data quality (deferred from Phase 2)
-- [ ] **Google review keyword scan** — scan venue reviews for patio keywords to improve patio confidence (deferred from Phase 2)
+- [x] **OSM outdoor_seating cross-reference** — `scripts/osm-outdoor-seating.ts` matches OSM `outdoor_seating=yes` to venues by proximity, upgrades confidence to verified
+- [x] **Google review keyword scan** — `scripts/review-keyword-scan.ts` scans Google Places reviews for patio keywords, upgrades confidence on 2+ mentions
 
 ---
 
