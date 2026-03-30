@@ -13,16 +13,25 @@
 | Tallest building | 1801 Hollis — 86.6m |
 | Second tallest | Maritime Centre — 71.0m |
 
-## Decision
+## Initial Decision
 
-**Overture does NOT pass the canonical-source threshold** (requires >=80% height coverage, got 21.4%).
+**Overture alone did NOT pass the canonical-source threshold** (requires >=80% height coverage, got 21.4%).
 
-**Plan for MVP:**
-- Use Overture footprints (782 buildings, excellent coverage) as the geometry source
-- Heights from Overture/OSM where available (167 buildings)
-- For the remaining ~79% without heights, forecast returns `unknown` per the spec algorithm
-- This is acceptable for MVP: the 167 buildings with heights cover most of the tall downtown buildings that actually cast significant shadows
-- NS LiDAR-derived heights are the recommended upgrade path for Phase 2
+## OSM Height Enrichment (2026-03-24)
+
+Ran `scripts/enrich-heights.ts` — an OSM Overpass query for building heights matching Overture footprints by proximity. Results:
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Height coverage | 21.4% (167/782) | **99.5%** (778/782) |
+
+This **passes the canonical-source threshold**. Overture footprints + OSM heights are the production geometry source.
+
+## Final Architecture
+- **Footprints:** Overture Maps (782 buildings, excellent coverage)
+- **Heights:** OSM Overpass enrichment (99.5% coverage)
+- **Remaining 4 buildings without heights:** forecast returns `unknown` per spec algorithm — negligible impact
+- NS LiDAR-derived heights remain an optional accuracy upgrade for post-MVP
 
 ## Spot Checks (top 15 by height)
 
